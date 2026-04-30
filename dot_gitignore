@@ -1,0 +1,13 @@
+# Editors
+.idea
+*.swp
+*.swo
+*~
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Personal instruction file for AI tools
+ai-instructions.txt

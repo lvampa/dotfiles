@@ -1,0 +1,8 @@
+{{ $name := promptString "Git name" -}}
+{{ $email := promptString "Git email" -}}
+{{ $token := promptString "Bitbucket token" -}}
+
+[data]
+  name = {{ $name | quote }}
+  email = {{ $email | quote }}
+  bitbucket_token = {{ $token | quote }}
