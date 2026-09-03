@@ -11,3 +11,8 @@ Thumbs.db
 
 # Personal instruction file for AI tools
 ai-instructions.txt
+
+# Claude Code local settings
+.claude/settings.local.json
+.claude/plans
+.env
