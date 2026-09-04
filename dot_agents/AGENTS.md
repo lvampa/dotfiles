@@ -1,13 +1,20 @@
 # Global agent instructions
 
-- If something looks wrong, even if it is not directly related to what you are doing, try to fix it along the way.
-- Apply the same high standard to engineering excellence: lint, test failures, test flakiness.
+## Before coding
+- For non-trivial changes, first state in a few sentences: what the change touches, the simplest design that fits the existing architecture, and what could break. Think like an architect reviewing the change, then implement it.
+- When fixing a bug, always reproduce it first.
+- Before adding a function, search for one that already does most of the job. Prefer extending it and updating callers over adding a near-duplicate. Ask first if the edit changes behavior for existing callers.
+
+## Standards
+- Prefer quality, simplicity, robustness, scalability, and long-term maintainability over development cost.
+- Hold lint, tests, and flakiness to the same standard as feature code.
 - Be picky about the UI and obsessed with pixel perfection.
-- When doing bug fixes, always start with reproducing the bug.
-- When making technical decisions, do not give much weight to development cost. Instead prefer quality, simplicity, robustness, scalability, and long term maintainability.
-- Never modify CHANGELOG.md or any files that are marked as auto-generated.
-- When writing commit messages, never auto add your agent name as the co-author
-- Never use the em dash "—", use plain dash "-" instead.
+- If something looks wrong nearby, fix it if it is small and safe. Otherwise mention it in the summary rather than expanding the change.
+
+## Never
+- Modify CHANGELOG.md or files marked auto-generated.
+- Add your agent name as a commit co-author.
+- Use the em dash; use a plain dash.
 
 # Opinions
 
