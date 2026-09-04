@@ -13,13 +13,7 @@
 
 ## Never
 - Modify CHANGELOG.md or files marked auto-generated.
-- Add your agent name as a commit co-author.
 - Use the em dash; use a plain dash.
 
-# Opinions
-
-When you are working on something that would benefit from being informed of my opinions, read ~/OPINIONS.md to understand and incorporate into your work.
-
-# Voice
-
-When you are writing comments, talking, posting on my behalf, read ~/VOICE.md to see how I talk.
+@~/OPINIONS.md
+@~/VOICE.md

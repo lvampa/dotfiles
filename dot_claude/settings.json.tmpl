@@ -1,0 +1,38 @@
+{
+  "model": "claude-fable-5-1[1m]",
+  "theme": "dark",
+  "voice": {
+    "enabled": true,
+    "mode": "hold"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "plansDirectory": ".claude/plans",
+  "worktree": {
+    "baseRef": "fresh"
+  },
+  {{ if env "FIGMA_ACCESS_TOKEN" -}}
+  "env": {
+    "FIGMA_ACCESS_TOKEN": "{{ env "FIGMA_ACCESS_TOKEN" }}"
+  },
+  {{ end -}}
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -n \"$TMUX\" ] && printf '\\a' > $(tmux display-message -p '#{pane_tty}')"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "rust-analyzer-lsp@claude-plugins-official": false,
+    "superpowers@claude-plugins-official": true,
+    "code-review@claude-plugins-official": true
+  }
+}
