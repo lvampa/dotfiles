@@ -9,7 +9,10 @@
 - When writing commit messages, never auto add your agent name as the co-author
 - Never use the em dash "—", use plain dash "-" instead.
 
-Optional reading, not loaded automatically:
+# Opinions
 
-- `~/VOICE.md`: how I write and how I want prose written for me. Read it before writing anything on my behalf.
-- `~/OPINIONS.md`: what I believe about tools, patterns, and trade-offs. Read it before making design or technology decisions.
+My opinions on tools, patterns, and trade-offs are in `~/OPINIONS.md`. It is not loaded automatically. Read it before making design or technology decisions.
+
+# Voice
+
+How I write, and how I want prose written for me, is in `~/VOICE.md`. It is not loaded automatically. Read it before writing anything on my behalf.
