@@ -11,7 +11,7 @@
 
 # Opinions
 
-My opinions on tools, patterns, and trade-offs are in `~/OPINIONS.md`. It is not loaded automatically. Read it before making design or technology decisions.
+When you are working on something that would benefit from being informed of my opinions, read ~/OPINIONS.md to understand and incorporate into your work.
 
 # Voice
 
