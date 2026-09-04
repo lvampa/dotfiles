@@ -16,3 +16,4 @@ ai-instructions.txt
 .claude/settings.local.json
 .claude/plans
 .env
+.CLAUDE_LOCAL.md
