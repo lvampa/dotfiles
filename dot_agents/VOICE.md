@@ -1,3 +1,3 @@
-# Voice and opinions
+# Voice
 
-How I write and what I believe about building software. Applies everywhere.
+How I write and how I want agents to write for me. Applies everywhere.
