@@ -8,7 +8,6 @@ Not for code.
 - Lowercase unless it is a name or a code identifier.
 - Direct. Ask the question or state the problem, no lead-in.
 - Plain words. Never "leverage", "robust", "seamless", "enhance", "ensure".
-- No emoji. No mention of AI or agents.
 
 ## Commits
 Imperative summary under 60 chars. Body only if the why is not obvious.
