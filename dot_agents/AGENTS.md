@@ -15,4 +15,4 @@ When you are working on something that would benefit from being informed of my o
 
 # Voice
 
-When you are writing something on my behalf, or working on something that would benefit from sounding like me, read ~/VOICE.md to understand and incorporate my voice into your work.
+When you are writing comments, talking, posting on my behalf, read ~/VOICE.md to see how I talk.
