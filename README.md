@@ -5,7 +5,7 @@ Personal dotfiles managed with [chezmoi](https://chezmoi.io).
 ## Setup
 
 ```sh
-chezmoi init https://github.com/connorabdelnoor/dotfiles.git
+chezmoi init lvampa
 chezmoi apply
 ```
 
