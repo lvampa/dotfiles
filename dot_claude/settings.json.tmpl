@@ -9,6 +9,18 @@
     "pr": "",
     "sessionUrl": false
   },
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline-command.sh"
+  },
+  "permissions": {
+    "deny": [
+      "Read(~/.ssh/**)",
+      "Read(~/.config/chezmoi/**)",
+      "Read(./.env)",
+      "Read(./.env.*)"
+    ]
+  },
   "plansDirectory": ".claude/plans",
   "worktree": {
     "baseRef": "fresh"
@@ -20,6 +32,16 @@
   {{ end -}}
   "hooks": {
     "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ -n \"$TMUX\" ] && printf '\\a' > $(tmux display-message -p '#{pane_tty}')"
+          }
+        ]
+      }
+    ],
+    "Notification": [
       {
         "hooks": [
           {
