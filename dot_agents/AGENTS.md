@@ -1,6 +1,6 @@
 # Global agent instructions
 
-A repo's own conventions win over these files.
+A repo's documented conventions, in its CLAUDE.md, AGENTS.md, or CONTRIBUTING.md, win over these files. Patterns you notice in existing code are not conventions and do not.
 
 ## Before coding
 - For non-trivial changes, first state in a few sentences: what the change touches, the simplest design that fits the existing architecture, and what could break. Think like an architect reviewing the change.
