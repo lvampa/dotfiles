@@ -10,6 +10,12 @@ export PATH="/opt/homebrew/bin:$PATH"
 export PATH="$HOME/.cargo/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 
+# Editor
+export EDITOR=nvim
+export VISUAL=nvim
+alias vim=nvim
+alias vi=nvim
+
 # ZSH completions
 FPATH=/opt/homebrew/share/zsh-completions:$FPATH
 autoload -Uz compinit
