@@ -44,9 +44,3 @@ chezmoi source directory (`~/.local/share/chezmoi`); the target is `$HOME`.
   when a default is saved via `/model`, `/voice`, or `/config`. This repo is the
   source of truth: when drift appears there, decide whether to adopt the value
   into the template or re-apply the template.
-
-## Git
-
-- Commit after every apply so the repo matches `$HOME`.
-- Commit subjects are imperative and short, matching existing history
-  (for example "Add alert command to tmux").
