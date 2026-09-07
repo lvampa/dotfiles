@@ -35,6 +35,8 @@ Good - guard first, then the steps in the order a reader expects:
 
 If a comment explains what the code does, rename or extract instead.
 Comments are for the why: workarounds, external constraints, invariants, links to issues.
+A docblock never restates the function name.
+If a comment argues for a design decision, it goes in the commit message.
 
 Bad:
     // check if the user is allowed
