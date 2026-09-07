@@ -16,6 +16,9 @@ export VISUAL=nvim
 alias vim=nvim
 alias vi=nvim
 
+# Claude Code
+alias cc=claude
+
 # ZSH completions
 FPATH=/opt/homebrew/share/zsh-completions:$FPATH
 autoload -Uz compinit
