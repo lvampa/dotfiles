@@ -1,11 +1,12 @@
 #!/bin/bash
-# Status line: user:dir:branch:<session>% usage:<context>% context
+# Status line: user:dir:branch:<session>% usage:<context>% context:model
 # Segments are omitted when their data is missing, colon included.
 
 input=$(cat)
 
 cwd=$(echo "$input" | jq -r '.cwd')
 user=$(whoami)
+model=$(echo "$input" | jq -r '.model.display_name // empty')
 case "$cwd" in
   "$HOME"*) display_dir="~${cwd#"$HOME"}" ;;
   *)        display_dir="$cwd" ;;
@@ -32,9 +33,11 @@ olive='\033[38;5;107m'
 aegean='\033[38;5;74m'
 terracotta='\033[38;5;173m'
 sand='\033[38;5;180m'
+fig='\033[38;5;96m'
 reset='\033[0m'
 
 printf "${olive}%s:%s${reset}" "$user" "$display_dir"
 [ -n "$branch" ]      && printf "${dim}:${reset}${aegean}%s${reset}" "$branch"
 [ -n "$session_pct" ] && printf "${dim}:${reset}${terracotta}%s%% usage${reset}" "$session_pct"
 [ -n "$ctx_pct" ]     && printf "${dim}:${reset}${sand}%s%% context${reset}" "$ctx_pct"
+[ -n "$model" ]       && printf "${dim}:${reset}${fig}%s${reset}" "$model"
