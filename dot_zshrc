@@ -18,6 +18,7 @@ alias vi=nvim
 
 # Claude Code
 alias cc=claude
+alias ccuse="watch -n 600 ccusage claude daily --last 1 --instances --no-cost --offline"
 
 # ZSH completions
 FPATH=/opt/homebrew/share/zsh-completions:$FPATH
