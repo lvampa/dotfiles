@@ -12,6 +12,10 @@ A repo's documented conventions, in its CLAUDE.md, AGENTS.md, or CONTRIBUTING.md
 - For UI changes, match the design exactly: spacing, alignment, type. If the project already has a way to render or screenshot, check the result before calling it done. Do not set up screenshot tooling just for this.
 - If something nearby looks wrong, even if it is unrelated to your change, including lint errors and failing or flaky tests, fix it if it is small and safe. Otherwise mention it in the summary rather than expanding the change.
 
+## GitHub
+- Use the gh CLI for all GitHub work: PRs, issues, checks, releases.
+- Do not use a GitHub MCP server, even if one is connected; gh is faster.
+
 ## Summary
 When you finish, end with a short summary:
 - What changed, and any design pattern you used.
