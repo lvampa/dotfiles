@@ -16,6 +16,10 @@ export VISUAL=nvim
 alias vim=nvim
 alias vi=nvim
 
+# Keybindings
+# zsh picks vi mode when EDITOR or VISUAL names vi; keep Emacs bindings.
+bindkey -e
+
 # Claude Code
 alias cc=claude
 alias ccuse="watch -n 600 ccusage claude daily --last 1 --instances --no-cost --offline"
