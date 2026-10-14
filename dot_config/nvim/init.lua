@@ -735,8 +735,16 @@ do
   local servers = {
     -- clangd = {},
     -- gopls = {},
-    -- pyright = {},
     -- tsc = {},
+
+    -- Python: basedpyright for types and navigation, Ruff for linting and formatting.
+    basedpyright = {
+      settings = {
+        basedpyright = {
+          disableOrganizeImports = true, -- Ruff organizes imports
+        },
+      },
+    },
     --
     -- Some languages (like rust) have entire language plugins that can be useful:
     --    https://github.com/mrcjkb/rustaceanvim
@@ -812,6 +820,15 @@ do
     vim.lsp.config(name, server)
     vim.lsp.enable(name)
   end
+
+  -- Ruff is not in `servers` so Mason doesn't install it. It resolves from PATH,
+  -- so an activated project venv supplies the version pinned in pyproject.toml.
+  vim.lsp.config('ruff', {
+    on_init = function(client)
+      client.server_capabilities.hoverProvider = false -- basedpyright's hover has the type info
+    end,
+  })
+  vim.lsp.enable 'ruff'
 end
 
 -- ============================================================
@@ -827,7 +844,7 @@ do
       -- You can specify filetypes to autoformat on save here:
       local enabled_filetypes = {
         -- lua = true,
-        -- python = true,
+        python = true,
       }
       if enabled_filetypes[vim.bo[bufnr].filetype] then
         return { timeout_ms = 500 }
@@ -840,6 +857,7 @@ do
     },
     -- You can also specify external formatters in here.
     formatters_by_ft = {
+      python = { 'ruff_fix', 'ruff_organize_imports', 'ruff_format' },
       -- rust = { 'rustfmt' },
       -- Conform can also run multiple formatters sequentially
       -- python = { "isort", "black" },
@@ -948,7 +966,7 @@ do
   vim.pack.add { { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } }
 
   -- Ensure basic parsers are installed
-  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
+  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'python', 'query', 'vim', 'vimdoc' }
   require('nvim-treesitter').install(parsers)
 
   ---@param buf integer
