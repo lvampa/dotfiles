@@ -1,5 +1,5 @@
 #!/bin/bash
-# Subagent status line: name model · description · elapsed · tokens
+# Subagent status line: name model:effort · description · elapsed · tokens
 # Adds the resolved model to each running subagent's row. Rows whose
 # model isn't resolved yet are left with the default rendering.
 
@@ -32,6 +32,7 @@ echo "$input" | jq -c '
   | "[38;5;74m" as $aegean
   | "[38;5;173m" as $terracotta
   | "[38;5;180m" as $sand
+  | "[38;5;150m" as $sage
   | .tasks[]
   | select(.model != null)
   | {
@@ -39,6 +40,7 @@ echo "$input" | jq -c '
       content: (
         (.label // .name // .type)
         + $dim + " · " + $reset + $aegean + (.model | shortmodel) + $reset
+        + (if .effort then $dim + ":" + $reset + $sage + (.effort | if type == "number" then fmttokens else . end) + $reset else "" end)
         + (if .description then $dim + " · " + $reset + .description else "" end)
         + $dim + " · " + $reset + $terracotta + (.startTime | fmtelapsed) + $reset
         + (if .tokenCount then $dim + " · " + $reset + $sand + "↓" + (.tokenCount | fmttokens) + $reset else "" end)

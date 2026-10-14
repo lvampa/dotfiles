@@ -1,5 +1,5 @@
 #!/bin/bash
-# Status line: user:dir:branch:<session>% usage:<context>% context:model
+# Status line: user:dir:branch:<session>% usage:<context>% context:model:effort
 # Segments are omitted when their data is missing, colon included.
 
 input=$(cat)
@@ -7,6 +7,8 @@ input=$(cat)
 cwd=$(echo "$input" | jq -r '.cwd')
 user=$(whoami)
 model=$(echo "$input" | jq -r '.model.display_name // empty')
+# Absent when the model doesn't support effort.
+effort=$(echo "$input" | jq -r '.effort.level // empty')
 case "$cwd" in
   "$HOME"*) display_dir="~${cwd#"$HOME"}" ;;
   *)        display_dir="$cwd" ;;
@@ -34,6 +36,7 @@ aegean='\033[38;5;74m'
 terracotta='\033[38;5;173m'
 sand='\033[38;5;180m'
 fig='\033[38;5;96m'
+sage='\033[38;5;150m'
 reset='\033[0m'
 
 printf "${olive}%s:%s${reset}" "$user" "$display_dir"
@@ -41,3 +44,4 @@ printf "${olive}%s:%s${reset}" "$user" "$display_dir"
 [ -n "$session_pct" ] && printf "${dim}:${reset}${terracotta}%s%% usage${reset}" "$session_pct"
 [ -n "$ctx_pct" ]     && printf "${dim}:${reset}${sand}%s%% context${reset}" "$ctx_pct"
 [ -n "$model" ]       && printf "${dim}:${reset}${fig}%s${reset}" "$model"
+[ -n "$effort" ]      && printf "${dim}:${reset}${sage}%s${reset}" "$effort"
