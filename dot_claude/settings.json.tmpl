@@ -18,7 +18,7 @@
     "command": "~/.claude/subagent-statusline.sh"
   },
   "permissions": {
-    "defaultMode": "acceptEdits",
+    "defaultMode": "auto",
     "deny": [
       "Read(~/.ssh/**)",
       "Read(~/.aws/**)",
@@ -26,11 +26,12 @@
       "Read(~/.config/chezmoi/**)",
       "Read(//**/.env)",
       "Read(//**/.env.*)",
+      "Edit(~/.claude/settings.json)",
+      "Edit(//**/.claude/settings*.json)",
       "Bash(git push*--force*)",
       "Bash(git push*-f*)",
       "Bash(git push*--no-verify*)",
       "Bash(git push*--delete*)",
-      "Bash(git push*:*)",
       "Bash(git push*main*)",
       "Bash(git push*master*)",
       "Bash(git push*HEAD*)",
