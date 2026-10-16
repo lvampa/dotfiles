@@ -28,5 +28,5 @@ When you finish, end with a short summary:
 - Use the em dash; use a plain dash.
 - Disable a lint rule, skip a test, or delete a failing test to make a check pass. Fix the cause, or mention it in the summary.
 
-@~/OPINIONS.md
-@~/VOICE.md
+@~/.agents/OPINIONS.md
+@~/.agents/VOICE.md
