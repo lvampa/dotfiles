@@ -47,6 +47,8 @@
       "Bash(gh * --repo *)",
       "Bash(gh *--repo=*)",
       "Bash(GH_REPO=*)",
+      "Bash(GH_HOST=*)",
+      "Bash(gh *--hostname*)",
       "Bash(GH_CONFIG_DIR=*)",
       "Bash(GH_TOKEN=*)",
       "Bash(GITHUB_TOKEN=*)",
@@ -105,7 +107,8 @@
     "enabled": true,
     "autoAllowBashIfSandboxed": true,
     "failIfUnavailable": true,
-    "excludedCommands": ["gh", "chezmoi"],
+    "allowUnsandboxedCommands": false,
+    "enableWeakerNetworkIsolation": true,
     "network": {
       "allowedDomains": [
         "github.com",
