@@ -168,3 +168,33 @@ config_dir() {
   [ "$status" -eq 0 ]
   [ "$(stat -f %Lp "$HOME/.config/gh-projects")" = 700 ]
 }
+
+@test "lets the sandbox read only this project's config dir" {
+  run "$SCRIPT" myproject <<<"$FAKE_TOKEN"
+  [ "$status" -eq 0 ]
+  [ "$(jq -c .sandbox.filesystem.allowRead .claude/settings.local.json)" = "[\"$(config_dir)\"]" ]
+}
+
+@test "keeps other allowRead entries and does not repeat its own" {
+  mkdir .claude
+  echo '{"sandbox":{"filesystem":{"allowRead":["/opt/data"]}}}' > .claude/settings.local.json
+  "$SCRIPT" myproject <<<"$FAKE_TOKEN"
+  run "$SCRIPT" myproject <<<"$FAKE_TOKEN"
+  [ "$status" -eq 0 ]
+  [ "$(jq -c .sandbox.filesystem.allowRead .claude/settings.local.json)" = "[\"/opt/data\",\"$(config_dir)\"]" ]
+}
+
+@test "drops the old project's folder when the name changes" {
+  "$SCRIPT" oldname <<<"$FAKE_TOKEN"
+  run "$SCRIPT" myproject <<<"$FAKE_TOKEN"
+  [ "$status" -eq 0 ]
+  [ "$(jq -c .sandbox.filesystem.allowRead .claude/settings.local.json)" = "[\"$(config_dir)\"]" ]
+}
+
+@test "keeps other sandbox settings" {
+  mkdir .claude
+  echo '{"sandbox":{"enabled":true,"network":{"allowedDomains":["example.com"]},"filesystem":{"denyRead":["/secret"]}}}' > .claude/settings.local.json
+  run "$SCRIPT" myproject <<<"$FAKE_TOKEN"
+  [ "$status" -eq 0 ]
+  [ "$(jq -c '.sandbox | del(.filesystem.allowRead)' .claude/settings.local.json)" = '{"enabled":true,"network":{"allowedDomains":["example.com"]},"filesystem":{"denyRead":["/secret"]}}' ]
+}

@@ -29,7 +29,7 @@ main() {
   # key it by user and host, so a second project's token would overwrite this one.
   printf '%s' "$token" | GH_CONFIG_DIR="$config_dir" gh auth login --with-token --insecure-storage
 
-  set_claude_config_dir "$repo_root/.claude/settings.local.json" "$config_dir"
+  set_claude_settings "$repo_root/.claude/settings.local.json" "$config_dir"
   GH_CONFIG_DIR="$config_dir" gh auth status
 }
 
@@ -68,14 +68,22 @@ create_private_dir() {
   chmod 700 "$1"
 }
 
-set_claude_config_dir() {
+set_claude_settings() {
   local settings="$1" config_dir="$2"
   local current='{}'
   [[ -s "$settings" ]] && current="$(cat "$settings")"
 
   local updated
-  updated="$(jq --arg dir "$config_dir" '.env.GH_CONFIG_DIR = $dir' <<<"$current")" ||
-    die "could not add GH_CONFIG_DIR to $settings; fix the file and rerun"
+  # The global Read deny on ~/.config/gh-projects is also a sandbox read block, and gh
+  # runs inside the sandbox, so each project unblocks only its own folder.
+  # A rename leaves the old project's folder in allowRead, so drop every gh-projects
+  # entry before adding this one.
+  updated="$(jq --arg dir "$config_dir" --arg projects "$(dirname "$config_dir")/" '
+    .env.GH_CONFIG_DIR = $dir
+    | .sandbox.filesystem.allowRead =
+        ([(.sandbox.filesystem.allowRead // [])[] | select(startswith($projects) | not)] + [$dir])
+  ' <<<"$current")" ||
+    die "could not update $settings; fix the file and rerun"
 
   mkdir -p "$(dirname "$settings")"
   printf '%s\n' "$updated" >"$settings.tmp"

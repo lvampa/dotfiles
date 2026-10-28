@@ -37,6 +37,8 @@ gh-project
 ```
 
 The name defaults to the repo folder name, and the token is stored in `~/.config/gh-projects/<name>`.
+The repo's `.claude/settings.local.json` gets `GH_CONFIG_DIR` and a sandbox read exception for that folder only.
+Restart Claude Code in the repo afterwards.
 Run it again with a new token when the old one expires.
 
 ## Tests
