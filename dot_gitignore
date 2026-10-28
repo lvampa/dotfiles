@@ -17,3 +17,5 @@ ai-instructions.txt
 .claude/plans
 .env
 CLAUDE.local.md
+
+**/.claude/.cc-writes/
