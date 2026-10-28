@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Give Claude Code in the current repo its own gh login.
+#
+# Copy a fine-grained token scoped to this repo, then run: gh-project <name>
+set -euo pipefail
+
+die() {
+  echo "gh-project: $*" >&2
+  exit 1
+}
+
+main() {
+  local name="${1:-}"
+  [[ -n "$name" ]] || die "usage: gh-project <name>"
+  assert_valid_name "$name"
+
+  local repo_root
+  repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" || die "run this inside a git repo"
+
+  local token
+  token="$(pbpaste)"
+  [[ -n "$token" ]] || die "clipboard is empty; copy the token first"
+  [[ "$token" == github_pat_* ]] || die "clipboard does not hold a fine-grained token (github_pat_...)"
+
+  local config_dir="$HOME/.config/gh-projects/$name"
+  create_private_dir "$config_dir"
+  # --insecure-storage keeps the token in this dir's hosts.yml. The Keychain would
+  # key it by user and host, so a second project's token would overwrite this one.
+  printf '%s' "$token" | GH_CONFIG_DIR="$config_dir" gh auth login --with-token --insecure-storage
+  pbcopy </dev/null
+
+  set_claude_config_dir "$repo_root/.claude/settings.local.json" "$config_dir"
+  GH_CONFIG_DIR="$config_dir" gh auth status
+}
+
+assert_valid_name() {
+  [[ "$1" =~ ^[A-Za-z0-9._-]+$ && "$1" != "." && "$1" != ".." ]] ||
+    die "name may only use letters, digits, '.', '_' and '-'"
+}
+
+create_private_dir() {
+  (umask 077 && mkdir -p "$1")
+  chmod 700 "$1"
+}
+
+set_claude_config_dir() {
+  local settings="$1" config_dir="$2"
+  local current='{}'
+  [[ -s "$settings" ]] && current="$(cat "$settings")"
+
+  local updated
+  updated="$(jq --arg dir "$config_dir" '.env.GH_CONFIG_DIR = $dir' <<<"$current")" ||
+    die "could not add GH_CONFIG_DIR to $settings; fix the file and rerun"
+
+  mkdir -p "$(dirname "$settings")"
+  printf '%s\n' "$updated" >"$settings.tmp"
+  mv "$settings.tmp" "$settings"
+}
+
+main "$@"
