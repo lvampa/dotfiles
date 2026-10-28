@@ -30,13 +30,13 @@ Create a fine-grained token scoped to that repo with these permissions:
 - Pull requests: read and write.
 - Contents, Actions, Deployments, and Commit statuses: read.
 
-Copy the token, then run this in the repo:
+Run this in the repo and paste the token when asked:
 
 ```sh
-gh-project myproject
+gh-project
 ```
 
-The token is stored in `~/.config/gh-projects/myproject`.
+The name defaults to the repo folder name, and the token is stored in `~/.config/gh-projects/<name>`.
 Run it again with a new token when the old one expires.
 
 ## Tests

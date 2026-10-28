@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Give Claude Code in the current repo its own gh login.
 #
-# Copy a fine-grained token scoped to this repo, then run: gh-project <name>
+# Run gh-project [name] and paste a fine-grained token scoped to this repo at the
+# prompt, or pipe the token in. The name defaults to the repo folder name.
 set -euo pipefail
 
 die() {
@@ -10,32 +11,56 @@ die() {
 }
 
 main() {
-  local name="${1:-}"
-  [[ -n "$name" ]] || die "usage: gh-project <name>"
-  assert_valid_name "$name"
-
   local repo_root
   repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" || die "run this inside a git repo"
 
+  local name
+  name="$(read_name "${1:-}" "$(basename "$repo_root")")"
+  assert_valid_name "$name"
+
   local token
-  token="$(pbpaste)"
-  [[ -n "$token" ]] || die "clipboard is empty; copy the token first"
-  [[ "$token" == github_pat_* ]] || die "clipboard does not hold a fine-grained token (github_pat_...)"
+  token="$(read_token)"
+  [[ -n "$token" ]] || die "no token given"
+  [[ "$token" == github_pat_* ]] || die "that is not a fine-grained token (github_pat_...)"
 
   local config_dir="$HOME/.config/gh-projects/$name"
   create_private_dir "$config_dir"
   # --insecure-storage keeps the token in this dir's hosts.yml. The Keychain would
   # key it by user and host, so a second project's token would overwrite this one.
   printf '%s' "$token" | GH_CONFIG_DIR="$config_dir" gh auth login --with-token --insecure-storage
-  pbcopy </dev/null
 
   set_claude_config_dir "$repo_root/.claude/settings.local.json" "$config_dir"
   GH_CONFIG_DIR="$config_dir" gh auth status
 }
 
+read_name() {
+  local given="$1" default="$2"
+  if [[ -n "$given" ]]; then
+    printf '%s' "$given"
+  elif [[ -t 0 ]]; then
+    local answer
+    read -rp "Project name [$default]: " answer
+    printf '%s' "${answer:-$default}"
+  else
+    printf '%s' "$default"
+  fi
+}
+
+read_token() {
+  local token=""
+  if [[ -t 0 ]]; then
+    read -rsp "Paste token (input hidden): " token
+    echo >&2
+  else
+    # The last line of piped input may have no newline, which makes read return 1.
+    IFS= read -r token || true
+  fi
+  printf '%s' "${token//[[:space:]]/}"
+}
+
 assert_valid_name() {
   [[ "$1" =~ ^[A-Za-z0-9._-]+$ && "$1" != "." && "$1" != ".." ]] ||
-    die "name may only use letters, digits, '.', '_' and '-'"
+    die "'$1' is not a valid name; use only letters, digits, '.', '_' and '-'"
 }
 
 create_private_dir() {

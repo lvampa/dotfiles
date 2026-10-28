@@ -17,14 +17,6 @@ if [ "$1 $2" = "auth login" ]; then
   echo "stdin=$(cat)" >> "$GH_LOG"
 fi
 EOF
-  cat > "$BATS_TEST_TMPDIR/bin/pbpaste" <<'EOF'
-#!/bin/sh
-printf '%s' "$FAKE_TOKEN"
-EOF
-  cat > "$BATS_TEST_TMPDIR/bin/pbcopy" <<'EOF'
-#!/bin/sh
-echo "pbcopy=$(cat)" >> "$GH_LOG"
-EOF
   chmod +x "$BATS_TEST_TMPDIR"/bin/*
 
   cd "$BATS_TEST_TMPDIR/repo" || return 1
@@ -35,54 +27,62 @@ config_dir() {
   echo "$HOME/.config/gh-projects/myproject"
 }
 
-@test "fails without a project name" {
-  run "$SCRIPT"
+@test "defaults the name to the repo folder" {
+  run "$SCRIPT" <<<"$FAKE_TOKEN"
+  [ "$status" -eq 0 ]
+  grep -qx "GH_CONFIG_DIR=$HOME/.config/gh-projects/repo gh auth status" "$GH_LOG"
+}
+
+@test "rejects a repo folder name that is not a valid name" {
+  mkdir "$BATS_TEST_TMPDIR/my repo" && cd "$BATS_TEST_TMPDIR/my repo" && git init -q
+  run "$SCRIPT" <<<"$FAKE_TOKEN"
   [ "$status" -ne 0 ]
-  [[ "$output" == *usage* ]]
+  [[ "$output" == *"'my repo' is not a valid name"* ]]
+  [ ! -e "$GH_LOG" ]
 }
 
 @test "rejects a name with a slash" {
-  run "$SCRIPT" ../escape
+  run "$SCRIPT" ../escape <<<"$FAKE_TOKEN"
   [ "$status" -ne 0 ]
+  [ ! -e "$GH_LOG" ]
   [ ! -e "$HOME/.config/escape" ]
 }
 
 @test "fails outside a git repo" {
   cd "$BATS_TEST_TMPDIR"
-  run "$SCRIPT" myproject
+  run "$SCRIPT" myproject <<<"$FAKE_TOKEN"
   [ "$status" -ne 0 ]
   [[ "$output" == *"git repo"* ]]
 }
 
-@test "fails when the clipboard is empty" {
-  printf '#!/bin/sh\n' > "$BATS_TEST_TMPDIR/bin/pbpaste"
-  run "$SCRIPT" myproject
+@test "fails when no token is given" {
+  run "$SCRIPT" myproject </dev/null
   [ "$status" -ne 0 ]
-  [[ "$output" == *clipboard* ]]
+  [[ "$output" == *"no token"* ]]
   [ ! -e .claude/settings.local.json ]
 }
 
 @test "creates a private config dir" {
-  run "$SCRIPT" myproject
+  run "$SCRIPT" myproject <<<"$FAKE_TOKEN"
   [ "$status" -eq 0 ]
   [ "$(stat -f %Lp "$(config_dir)")" = 700 ]
 }
 
-@test "logs in with the clipboard token into the project config dir" {
-  run "$SCRIPT" myproject
+@test "logs in with the token into the project config dir" {
+  run "$SCRIPT" myproject <<<"$FAKE_TOKEN"
   [ "$status" -eq 0 ]
   grep -qx "GH_CONFIG_DIR=$(config_dir) gh auth login --with-token --insecure-storage" "$GH_LOG"
   grep -qx "stdin=$FAKE_TOKEN" "$GH_LOG"
 }
 
 @test "does not print the token" {
-  run "$SCRIPT" myproject
+  run "$SCRIPT" myproject <<<"$FAKE_TOKEN"
   [[ "$output" != *"$FAKE_TOKEN"* ]]
 }
 
 @test "creates settings.local.json at the repo root" {
   mkdir sub && cd sub
-  run "$SCRIPT" myproject
+  run "$SCRIPT" myproject <<<"$FAKE_TOKEN"
   [ "$status" -eq 0 ]
   [ "$(jq -r .env.GH_CONFIG_DIR ../.claude/settings.local.json)" = "$(config_dir)" ]
 }
@@ -90,7 +90,7 @@ config_dir() {
 @test "keeps existing keys in settings.local.json" {
   mkdir .claude
   echo '{"model":"x","env":{"FOO":"bar"}}' > .claude/settings.local.json
-  run "$SCRIPT" myproject
+  run "$SCRIPT" myproject <<<"$FAKE_TOKEN"
   [ "$status" -eq 0 ]
   [ "$(jq -r .model .claude/settings.local.json)" = x ]
   [ "$(jq -r .env.FOO .claude/settings.local.json)" = bar ]
@@ -98,13 +98,13 @@ config_dir() {
 }
 
 @test "shows auth status for the project" {
-  run "$SCRIPT" myproject
+  run "$SCRIPT" myproject <<<"$FAKE_TOKEN"
   grep -qx "GH_CONFIG_DIR=$(config_dir) gh auth status" "$GH_LOG"
 }
 
 @test "leaves settings alone when login fails" {
   printf '#!/bin/sh\necho "bad token" >&2\nexit 1\n' > "$BATS_TEST_TMPDIR/bin/gh"
-  run "$SCRIPT" myproject
+  run "$SCRIPT" myproject <<<"$FAKE_TOKEN"
   [ "$status" -ne 0 ]
   [ ! -e .claude/settings.local.json ]
 }
@@ -112,46 +112,59 @@ config_dir() {
 @test "keeps invalid settings.local.json untouched and leaves no temp file" {
   mkdir .claude
   echo 'not json' > .claude/settings.local.json
-  run "$SCRIPT" myproject
+  run "$SCRIPT" myproject <<<"$FAKE_TOKEN"
   [ "$status" -ne 0 ]
   [ "$(cat .claude/settings.local.json)" = "not json" ]
   [ ! -e .claude/settings.local.json.tmp ]
 }
 
 @test "rerunning restores permissions and keeps the config dir" {
-  "$SCRIPT" myproject
+  "$SCRIPT" myproject <<<"$FAKE_TOKEN"
   chmod 755 "$(config_dir)"
-  run "$SCRIPT" myproject
+  run "$SCRIPT" myproject <<<"$FAKE_TOKEN"
   [ "$status" -eq 0 ]
   [ "$(stat -f %Lp "$(config_dir)")" = 700 ]
   [ "$(jq -r .env.GH_CONFIG_DIR .claude/settings.local.json)" = "$(config_dir)" ]
   [ "$(grep -c 'gh auth login' "$GH_LOG")" = 2 ]
 }
 
-@test "fails when the clipboard is not a fine-grained token" {
-  printf '#!/bin/sh\necho some other text\n' > "$BATS_TEST_TMPDIR/bin/pbpaste"
-  run "$SCRIPT" myproject
+@test "fails when the token is not fine-grained" {
+  run "$SCRIPT" myproject <<<"ghp_classic"
   [ "$status" -ne 0 ]
   [[ "$output" == *github_pat_* ]]
   [ ! -e "$GH_LOG" ]
 }
 
-@test "clears the clipboard after login" {
-  run "$SCRIPT" myproject
+@test "strips whitespace around the token" {
+  run "$SCRIPT" myproject <<<"  $FAKE_TOKEN  "
   [ "$status" -eq 0 ]
-  grep -qx "pbcopy=" "$GH_LOG"
+  grep -qx "stdin=$FAKE_TOKEN" "$GH_LOG"
+}
+
+@test "accepts piped input without a final newline" {
+  run bash -c 'printf %s "$FAKE_TOKEN" | "$0" myproject' "$SCRIPT"
+  [ "$status" -eq 0 ]
+  grep -qx "stdin=$FAKE_TOKEN" "$GH_LOG"
+}
+
+@test "rejects . and .. as names" {
+  run "$SCRIPT" . <<<"$FAKE_TOKEN"
+  [ "$status" -ne 0 ]
+  run "$SCRIPT" .. <<<"$FAKE_TOKEN"
+  [ "$status" -ne 0 ]
+  [ ! -e "$GH_LOG" ]
 }
 
 @test "fills in an empty settings.local.json" {
   mkdir .claude
   : > .claude/settings.local.json
-  run "$SCRIPT" myproject
+  run "$SCRIPT" myproject <<<"$FAKE_TOKEN"
   [ "$status" -eq 0 ]
   [ "$(jq -r .env.GH_CONFIG_DIR .claude/settings.local.json)" = "$(config_dir)" ]
 }
 
 @test "creates the parent config dir as private" {
-  run "$SCRIPT" myproject
+  run "$SCRIPT" myproject <<<"$FAKE_TOKEN"
   [ "$status" -eq 0 ]
   [ "$(stat -f %Lp "$HOME/.config/gh-projects")" = 700 ]
 }
